@@ -745,7 +745,7 @@ function renderThemeToggle(){
   btn.onclick = toggleTheme;
   return btn;
 }
-const DANIA_AUTH_REDIRECT_URL = 'https://daniaapp.ir/';
+const DANIA_AUTH_REDIRECT_URL = 'https://daniaapp.ir/reset-password/';
 const IS_PASSWORD_RECOVERY = /(?:^|[&#?])type=recovery(?:&|$)/i.test(location.hash + '&' + location.search);
 let authView = IS_PASSWORD_RECOVERY ? 'reset' : ((location.hash === '#signup') ? 'signup' : 'login'); // 'login' | 'signup' | 'reset'
 let authErrors = {}; // field -> message
