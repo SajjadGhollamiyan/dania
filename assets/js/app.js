@@ -43,7 +43,7 @@ let authNotice = ''; // e.g. "check your email"
 let authBusy = false;
 let authBusyToken = 0;
 const __requestedTab = new URLSearchParams(window.location.search).get('tab');
-const __validTabs = ['dashboard','private','classes','settings','certificate','exam','whiteboard','game-maker'];
+const __validTabs = ['dashboard','private','classes','settings','certificate','exam','whiteboard','game-maker','smart-board'];
 let __savedTab = null;
 try { __savedTab = localStorage.getItem('dania_active_tab'); } catch(e) {}
 const __initialTab = __validTabs.includes(__requestedTab) ? __requestedTab : __savedTab;
@@ -55,6 +55,7 @@ let expandedSessionId = null;
 let showNewSessionForm = false;
 let newSessionDate = null; // {jy,jm,jd} while the picker is open
 let sidebarOpen = false; // mobile drawer state
+let sidebarGroupState = { classes: true, services: true, account: true }; // collapsible sidebar groups
 let cert = null; // certificate maker state, created on first open
 let modal = null;
 let gameBuilderState = {
@@ -80,6 +81,7 @@ const SERVICE_NAV_ITEMS = [
   {tab:'exam', label:'آزمون‌ساز', icon:'📝'},
   {tab:'whiteboard', label:'تخته مجازی', icon:'🖍️'},
   {tab:'game-maker', label:'بازی‌ساز آموزشی', icon:'🎮'},
+  {tab:'smart-board', label:'تخته هوشمند', icon:'🧠'},
 ];
 function animateIn(el, className){
   requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ el.classList.add(className); }); });
@@ -99,7 +101,7 @@ function closeSidebarThenRender(afterFn){
 }
 function goToTab(tab){
   closeSidebarThenRender(()=>{
-    if(!['dashboard','private','classes','settings','certificate','exam','whiteboard','game-maker'].includes(tab)) return;
+    if(!['dashboard','private','classes','settings','certificate','exam','whiteboard','game-maker','smart-board'].includes(tab)) return;
     activeTab = tab;
     // Remember the selected section and keep it in the URL so refresh returns here.
     try { localStorage.setItem('dania_active_tab', tab); } catch(e) {}
@@ -142,26 +144,48 @@ function renderSidebar(){
   aside.appendChild(userRow);
 
   const nav = document.createElement('nav');
-  NAV_ITEMS.forEach(item=>{
+  nav.className = 'sidebar-nav';
+
+  const makeNavButton = item => {
     const btn = document.createElement('button');
+    btn.type = 'button';
     btn.className = 'side-nav-item' + (activeTab===item.tab?' active':'');
     btn.dataset.tab = item.tab;
-    btn.innerHTML = `<span>${item.icon}</span><span>${item.label}</span>`;
+    btn.innerHTML = `<span aria-hidden="true">${item.icon}</span><span>${item.label}</span>`;
     btn.onclick = ()=>goToTab(item.tab);
-    nav.appendChild(btn);
-  });
-  const svcLabel = document.createElement('div');
-  svcLabel.className = 'side-nav-section';
-  svcLabel.textContent = 'خدمات';
-  nav.appendChild(svcLabel);
-  SERVICE_NAV_ITEMS.forEach(item=>{
-    const btn = document.createElement('button');
-    btn.className = 'side-nav-item' + (activeTab===item.tab?' active':'');
-    btn.dataset.tab = item.tab;
-    btn.innerHTML = `<span>${item.icon}</span><span>${item.label}</span>`;
-    btn.onclick = ()=>goToTab(item.tab);
-    nav.appendChild(btn);
-  });
+    return btn;
+  };
+  const addNavGroup = (label, items, groupKey) => {
+    const group = document.createElement('div');
+    group.className = 'side-nav-group';
+    const isActiveGroup = items.some(item=>item.tab===activeTab);
+    const expanded = isActiveGroup || sidebarGroupState[groupKey] === true;
+    group.classList.toggle('is-collapsed', !expanded);
+    const heading = document.createElement('button');
+    heading.type = 'button';
+    heading.className = 'side-nav-section side-nav-section-toggle';
+    heading.setAttribute('aria-expanded', String(expanded));
+    heading.innerHTML = `<span>${label}</span><span class="side-nav-chevron" aria-hidden="true">⌄</span>`;
+    heading.onclick = () => {
+      sidebarGroupState[groupKey] = !group.classList.contains('is-collapsed');
+      group.classList.toggle('is-collapsed');
+      heading.setAttribute('aria-expanded', String(!group.classList.contains('is-collapsed')));
+    };
+    group.appendChild(heading);
+    const children = document.createElement('div');
+    children.className = 'side-nav-subitems';
+    items.forEach(item=>children.appendChild(makeNavButton(item)));
+    group.appendChild(children);
+    nav.appendChild(group);
+  };
+
+  // Keep Dashboard easy to find, then visually group related destinations.
+  const dashboardItem = NAV_ITEMS.find(item=>item.tab==='dashboard');
+  if(dashboardItem) nav.appendChild(makeNavButton(dashboardItem));
+  addNavGroup('کلاس‌ها', NAV_ITEMS.filter(item=>item.tab==='private' || item.tab==='classes'), 'classes');
+  addNavGroup('خدمات آموزشی', SERVICE_NAV_ITEMS, 'services');
+  const settingsItem = NAV_ITEMS.find(item=>item.tab==='settings');
+  if(settingsItem) addNavGroup('حساب کاربری', [settingsItem], 'account');
   aside.appendChild(nav);
 
   const bottom = document.createElement('div');
@@ -1148,9 +1172,28 @@ function render(){
   else if(activeTab==='exam') renderExamBuilderScreen(content);
   else if(activeTab==='whiteboard') renderVBoardScreen(content);
   else if(activeTab==='game-maker') renderGameMakerScreen(content);
+  else if(activeTab==='smart-board') renderSmartBoardScreen(content);
 
   const oldModal=$app.querySelector('.modal-bg'); if(oldModal) oldModal.remove();
   if(modal) renderModal();
+}
+
+
+function renderSmartBoardScreen(root){
+  const wrap = document.createElement('section');
+  wrap.className = 'smart-board-page';
+  wrap.innerHTML = `
+    <div class="smart-board-hero">
+      <div class="smart-board-icon" aria-hidden="true">🧠</div>
+      <div><span class="smart-board-eyebrow">فضای یادگیری تعاملی</span><h2>تخته هوشمند دانیا</h2><p>محیطی برای تجربه‌های دیداری و تعاملی درس‌ها؛ قابلیت‌های آموزشی جدید به‌مرور به این بخش اضافه می‌شوند.</p></div>
+    </div>
+    <div class="smart-board-grid">
+      <article class="smart-board-feature"><span>🪐</span><h3>منظومه شمسی سه‌بعدی</h3><p>کاوش تعاملی سیاره‌ها و اجرام منظومه شمسی</p><small>در دست توسعه</small></article>
+      <article class="smart-board-feature"><span>🫀</span><h3>آناتومی سه‌بعدی انسان</h3><p>بررسی دیداری اندام‌ها و ساختارهای بدن</p><small>در دست توسعه</small></article>
+      <article class="smart-board-feature"><span>🔬</span><h3>آزمایشگاه علوم تعاملی</h3><p>مدل‌ها و تجربه‌های آموزشی برای کلاس درس</p><small>قابلیت آینده</small></article>
+      <article class="smart-board-feature"><span>➕</span><h3>قابلیت‌های درسی بیشتر</h3><p>ابزارهای تعاملی برای درس‌ها و پایه‌های مختلف</p><small>در برنامه توسعه</small></article>
+    </div>`;
+  root.appendChild(wrap);
 }
 
 function pwField(id, labelText, autocomplete){
