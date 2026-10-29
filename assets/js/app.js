@@ -43,7 +43,11 @@ let authNotice = ''; // e.g. "check your email"
 let authBusy = false;
 let authBusyToken = 0;
 const __requestedTab = new URLSearchParams(window.location.search).get('tab');
-let activeTab = ['dashboard','private','classes','settings','certificate','exam','whiteboard','game-maker'].includes(__requestedTab) ? __requestedTab : 'dashboard';
+const __validTabs = ['dashboard','private','classes','settings','certificate','exam','whiteboard','game-maker'];
+let __savedTab = null;
+try { __savedTab = localStorage.getItem('dania_active_tab'); } catch(e) {}
+const __initialTab = __validTabs.includes(__requestedTab) ? __requestedTab : __savedTab;
+let activeTab = __validTabs.includes(__initialTab) ? __initialTab : 'dashboard';
 let dashboardSelectedDay = null; // selected day-of-week filter on the dashboard's day strip
 let activeStudentId = null;
 let activeClassId = null;
@@ -95,7 +99,15 @@ function closeSidebarThenRender(afterFn){
 }
 function goToTab(tab){
   closeSidebarThenRender(()=>{
+    if(!['dashboard','private','classes','settings','certificate','exam','whiteboard','game-maker'].includes(tab)) return;
     activeTab = tab;
+    // Remember the selected section and keep it in the URL so refresh returns here.
+    try { localStorage.setItem('dania_active_tab', tab); } catch(e) {}
+    try {
+      const nextUrl = new URL(window.location.href);
+      nextUrl.searchParams.set('tab', tab);
+      window.history.replaceState({}, '', nextUrl.pathname + nextUrl.search + nextUrl.hash);
+    } catch(e) {}
     activeStudentId=null; activeClassId=null; expandedSessionId=null; showNewSessionForm=false;
     if(tab==='certificate' && !cert) initCertState();
     if(tab==='exam' && !examBuilder) initExamBuilder();
