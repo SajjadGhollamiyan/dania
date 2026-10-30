@@ -1806,3 +1806,19 @@ html[data-theme="dark"] .student-grid > .s-card .s-actions{
 .smart-board-feature p{margin:0 0 12px;color:var(--ink-muted);font-size:13px;line-height:1.8;}
 .smart-board-feature small{display:inline-block;padding:4px 9px;border-radius:99px;background:color-mix(in srgb,#7c3aed 10%,var(--card));color:#7c3aed;font-weight:700;font-size:11px;}
 @media(max-width:600px){.smart-board-grid{grid-template-columns:1fr}.smart-board-hero{align-items:flex-start}.smart-board-icon{width:52px;height:52px;flex-basis:52px;border-radius:15px;font-size:25px;}}
+
+
+/* Unified scrolling for the entire sidebar (logo, profile, navigation and bottom actions) */
+.sidebar{
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  scrollbar-width:thin;
+  scrollbar-color:var(--line) transparent;
+  overscroll-behavior:contain;
+}
+.sidebar::-webkit-scrollbar{width:5px;}
+.sidebar::-webkit-scrollbar-track{background:transparent;}
+.sidebar::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--line) 85%,transparent);border-radius:99px;}
+.sidebar::-webkit-scrollbar-thumb:hover{background:var(--ink-faint);}
+.sidebar-nav{flex:0 0 auto !important;min-height:auto !important;overflow:visible !important;overflow-y:visible !important;overflow-x:visible !important;}
+.sidebar-logo,.sidebar-user-profile,.sidebar-nav,.sidebar-bottom{flex-shrink:0;}
