@@ -1857,3 +1857,24 @@ html[data-theme="dark"] .student-grid > .s-card .s-actions{
 .sidebar::-webkit-scrollbar{width:5px;}
 .sidebar::-webkit-scrollbar-track{background:transparent;}
 .sidebar::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px;}
+
+
+/* Unified scrollbar appearance across the whole Dania app */
+*:not(html):not(body){
+  scrollbar-width:thin !important;
+  scrollbar-color:var(--line) transparent !important;
+}
+*::-webkit-scrollbar{width:6px;height:6px;}
+*::-webkit-scrollbar-track{background:transparent;border-radius:99px;}
+*::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--line) 88%,transparent);border-radius:99px;border:1px solid transparent;background-clip:padding-box;}
+*::-webkit-scrollbar-thumb:hover{background:var(--ink-faint);background-clip:padding-box;}
+*::-webkit-scrollbar-corner{background:transparent;}
+/* Restore visible scrollbars on scrollable areas that used to hide them on mobile */
+@media(max-width:640px){
+  .main-area{scrollbar-width:thin !important;-ms-overflow-style:auto !important;}
+  .main-area::-webkit-scrollbar{display:block !important;width:6px !important;height:6px !important;}
+}
+@media(max-width:900px){
+  .dashboard-stats,.student-grid,.dashboard-student-grid{scrollbar-width:thin !important;}
+  .dashboard-stats::-webkit-scrollbar,.student-grid::-webkit-scrollbar,.dashboard-student-grid::-webkit-scrollbar{display:block !important;width:6px !important;height:6px !important;}
+}
