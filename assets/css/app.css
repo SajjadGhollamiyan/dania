@@ -203,7 +203,7 @@
   .hamburger-btn:hover{color:var(--primary);border-color:var(--primary);}
   .shell{display:flex;width:100%;height:100vh;min-height:100vh;align-items:stretch;overflow:hidden;}
   .sidebar{
-    width:250px;flex-shrink:0;background:var(--card);border-left:1px solid var(--line);
+    width:278px;flex:0 0 278px;background:var(--card);border-left:1px solid var(--line);
     display:flex;flex-direction:column;padding:20px 14px;position:sticky;top:0;height:100vh;overflow:hidden;
     transition:transform .25s cubic-bezier(.4,0,.2,1);
   }
@@ -1785,15 +1785,12 @@ html[data-theme="dark"] .student-grid > .s-card .s-actions{
 @media(max-height:700px){.sidebar{padding-top:14px;padding-bottom:14px}.sidebar-logo{padding-bottom:8px}.sidebar-user-profile{margin-bottom:8px}.side-nav-group{margin-top:7px;padding-top:6px}.side-nav-item{padding-top:5px;padding-bottom:5px}}
 
 
-/* Collapsible sidebar submenus */
-.side-nav-section-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;border:0;background:transparent;font:inherit;text-align:right;cursor:pointer;padding:2px 12px 5px;color:var(--ink-faint);}
-.side-nav-section-toggle:hover{color:var(--ink);}
-.side-nav-chevron{display:inline-block;font-size:16px;transition:transform .18s ease;}
-.side-nav-group.is-collapsed .side-nav-chevron{transform:rotate(90deg);}
-.side-nav-subitems{display:grid;grid-template-rows:1fr;opacity:1;transition:grid-template-rows .2s ease,opacity .18s ease;}
-.side-nav-subitems>.side-nav-item{min-height:0;overflow:hidden;}
-.side-nav-group.is-collapsed .side-nav-subitems{grid-template-rows:0fr;opacity:0;}
-.side-nav-group.is-collapsed .side-nav-subitems>.side-nav-item{display:none;}
+/* Spacious, modern sidebar navigation without collapsible submenus */
+.side-nav-section{display:block;padding:0 12px 5px;border:0;background:transparent;}
+.side-nav-group{margin-top:12px;padding-top:10px;}
+.side-nav-group .side-nav-item{padding:7px 10px;}
+.side-nav-group .side-nav-item>span:last-child{white-space:nowrap;}
+@media(max-width:560px){.sidebar{width:min(88vw,340px);flex-basis:min(88vw,340px);max-width:340px;}}
 
 /* Smart board landing page (feature modules can be added here later) */
 .smart-board-page{display:grid;gap:20px;padding:clamp(12px,2vw,24px);}

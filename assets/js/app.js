@@ -55,7 +55,6 @@ let expandedSessionId = null;
 let showNewSessionForm = false;
 let newSessionDate = null; // {jy,jm,jd} while the picker is open
 let sidebarOpen = false; // mobile drawer state
-let sidebarGroupState = { classes: true, services: true, account: true }; // collapsible sidebar groups
 let cert = null; // certificate maker state, created on first open
 let modal = null;
 let gameBuilderState = {
@@ -155,37 +154,24 @@ function renderSidebar(){
     btn.onclick = ()=>goToTab(item.tab);
     return btn;
   };
-  const addNavGroup = (label, items, groupKey) => {
+  const addNavGroup = (label, items) => {
     const group = document.createElement('div');
     group.className = 'side-nav-group';
-    const isActiveGroup = items.some(item=>item.tab===activeTab);
-    const expanded = isActiveGroup || sidebarGroupState[groupKey] === true;
-    group.classList.toggle('is-collapsed', !expanded);
-    const heading = document.createElement('button');
-    heading.type = 'button';
-    heading.className = 'side-nav-section side-nav-section-toggle';
-    heading.setAttribute('aria-expanded', String(expanded));
-    heading.innerHTML = `<span>${label}</span><span class="side-nav-chevron" aria-hidden="true">⌄</span>`;
-    heading.onclick = () => {
-      sidebarGroupState[groupKey] = !group.classList.contains('is-collapsed');
-      group.classList.toggle('is-collapsed');
-      heading.setAttribute('aria-expanded', String(!group.classList.contains('is-collapsed')));
-    };
+    const heading = document.createElement('div');
+    heading.className = 'side-nav-section';
+    heading.textContent = label;
     group.appendChild(heading);
-    const children = document.createElement('div');
-    children.className = 'side-nav-subitems';
-    items.forEach(item=>children.appendChild(makeNavButton(item)));
-    group.appendChild(children);
+    items.forEach(item=>group.appendChild(makeNavButton(item)));
     nav.appendChild(group);
   };
 
   // Keep Dashboard easy to find, then visually group related destinations.
   const dashboardItem = NAV_ITEMS.find(item=>item.tab==='dashboard');
   if(dashboardItem) nav.appendChild(makeNavButton(dashboardItem));
-  addNavGroup('کلاس‌ها', NAV_ITEMS.filter(item=>item.tab==='private' || item.tab==='classes'), 'classes');
-  addNavGroup('خدمات آموزشی', SERVICE_NAV_ITEMS, 'services');
+  addNavGroup('کلاس‌ها', NAV_ITEMS.filter(item=>item.tab==='private' || item.tab==='classes'));
+  addNavGroup('خدمات آموزشی', SERVICE_NAV_ITEMS);
   const settingsItem = NAV_ITEMS.find(item=>item.tab==='settings');
-  if(settingsItem) addNavGroup('حساب کاربری', [settingsItem], 'account');
+  if(settingsItem) addNavGroup('حساب کاربری', [settingsItem]);
   aside.appendChild(nav);
 
   const bottom = document.createElement('div');
