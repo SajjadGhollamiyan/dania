@@ -1822,3 +1822,38 @@ html[data-theme="dark"] .student-grid > .s-card .s-actions{
 .sidebar::-webkit-scrollbar-thumb:hover{background:var(--ink-faint);}
 .sidebar-nav{flex:0 0 auto !important;min-height:auto !important;overflow:visible !important;overflow-y:visible !important;overflow-x:visible !important;}
 .sidebar-logo,.sidebar-user-profile,.sidebar-nav,.sidebar-bottom{flex-shrink:0;}
+
+/* Final fix: the logo, profile, all navigation groups, and bottom actions
+   belong to one continuous scroll area inside the sidebar. */
+.sidebar{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:stretch !important;
+  box-sizing:border-box !important;
+  height:100vh !important;
+  height:100dvh !important;
+  min-height:0 !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.sidebar-logo,
+.sidebar-user-profile,
+.sidebar-nav,
+.sidebar-bottom{
+  position:static !important;
+  flex:0 0 auto !important;
+  flex-shrink:0 !important;
+  min-height:auto !important;
+}
+.sidebar-nav{
+  overflow:visible !important;
+  overflow-x:visible !important;
+  overflow-y:visible !important;
+}
+.sidebar-bottom{margin-top:0 !important;}
+.sidebar{scrollbar-width:thin;scrollbar-color:var(--line) transparent;}
+.sidebar::-webkit-scrollbar{width:5px;}
+.sidebar::-webkit-scrollbar-track{background:transparent;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px;}
