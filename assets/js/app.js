@@ -1175,7 +1175,7 @@ function renderSmartBoardScreen(root){
     </div>
     <div class="smart-board-grid">
       <article class="smart-board-feature"><span>🪐</span><h3>منظومه شمسی سه‌بعدی</h3><p>کاوش تعاملی سیاره‌ها و اجرام منظومه شمسی</p><small>در دست توسعه</small></article>
-      <article class="smart-board-feature"><span>🫀</span><h3>آناتومی سه‌بعدی انسان</h3><p>بررسی دیداری اندام‌ها و ساختارهای بدن</p><small>در دست توسعه</small></article>
+      <article class="smart-board-feature smart-board-feature-clickable" role="link" tabindex="0" aria-label="ورود به آناتومی سه‌بعدی بدن انسان" onclick="window.location.href='pages/anatomy-3d.html'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='pages/anatomy-3d.html'}"><span>🫀</span><h3>آناتومی سه‌بعدی بدن انسان</h3><p>بررسی تعاملی قلب، مغز و ریه با امکان چرخش و بزرگ‌نمایی</p><small>ورود به محیط سه‌بعدی ←</small></article>
       <article class="smart-board-feature"><span>🔬</span><h3>آزمایشگاه علوم تعاملی</h3><p>مدل‌ها و تجربه‌های آموزشی برای کلاس درس</p><small>قابلیت آینده</small></article>
       <article class="smart-board-feature"><span>➕</span><h3>قابلیت‌های درسی بیشتر</h3><p>ابزارهای تعاملی برای درس‌ها و پایه‌های مختلف</p><small>در برنامه توسعه</small></article>
     </div>`;

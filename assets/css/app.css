@@ -1878,3 +1878,8 @@ html[data-theme="dark"] .student-grid > .s-card .s-actions{
   .dashboard-stats,.student-grid,.dashboard-student-grid{scrollbar-width:thin !important;}
   .dashboard-stats::-webkit-scrollbar,.student-grid::-webkit-scrollbar,.dashboard-student-grid::-webkit-scrollbar{display:block !important;width:6px !important;height:6px !important;}
 }
+
+/* Clickable 3D human anatomy card */
+.smart-board-feature-clickable{cursor:pointer;transition:transform .18s ease,box-shadow .18s ease;outline:none}
+.smart-board-feature-clickable:hover,.smart-board-feature-clickable:focus-visible{transform:translateY(-3px);box-shadow:0 12px 28px rgba(91,71,224,.18)}
+.smart-board-feature-clickable small{color:var(--primary,#5B47E0);font-weight:700}
