@@ -43,7 +43,7 @@ let authNotice = ''; // e.g. "check your email"
 let authBusy = false;
 let authBusyToken = 0;
 const __requestedTab = new URLSearchParams(window.location.search).get('tab');
-const __validTabs = ['dashboard','private','classes','settings','certificate','exam','whiteboard','game-maker','smart-board'];
+const __validTabs = ['dashboard','private','classes','settings','certificate','exam','whiteboard','game-maker','smart-board','ai-assistant'];
 let __savedTab = null;
 try { __savedTab = localStorage.getItem('dania_active_tab'); } catch(e) {}
 const __initialTab = __validTabs.includes(__requestedTab) ? __requestedTab : __savedTab;
@@ -81,6 +81,7 @@ const SERVICE_NAV_ITEMS = [
   {tab:'whiteboard', label:'تخته مجازی', icon:'🖍️'},
   {tab:'game-maker', label:'بازی‌ساز آموزشی', icon:'🎮'},
   {tab:'smart-board', label:'تخته هوشمند', icon:'🧠'},
+  {tab:'ai-assistant', label:'دستیار هوشمند', icon:'✨'},
 ];
 function animateIn(el, className){
   requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ el.classList.add(className); }); });
@@ -100,7 +101,7 @@ function closeSidebarThenRender(afterFn){
 }
 function goToTab(tab){
   closeSidebarThenRender(()=>{
-    if(!['dashboard','private','classes','settings','certificate','exam','whiteboard','game-maker','smart-board'].includes(tab)) return;
+    if(!['dashboard','private','classes','settings','certificate','exam','whiteboard','game-maker','smart-board','ai-assistant'].includes(tab)) return;
     activeTab = tab;
     // Remember the selected section and keep it in the URL so refresh returns here.
     try { localStorage.setItem('dania_active_tab', tab); } catch(e) {}
@@ -1159,9 +1160,79 @@ function render(){
   else if(activeTab==='whiteboard') renderVBoardScreen(content);
   else if(activeTab==='game-maker') renderGameMakerScreen(content);
   else if(activeTab==='smart-board') renderSmartBoardScreen(content);
+  else if(activeTab==='ai-assistant') renderAIAssistantScreen(content);
 
   const oldModal=$app.querySelector('.modal-bg'); if(oldModal) oldModal.remove();
   if(modal) renderModal();
+}
+
+
+// DANIA AI — مرحله اول: رابط کاربری و تعاملات نمایشی، بدون اتصال API
+function renderAIAssistantScreen(root){
+  const page=document.createElement('section');
+  page.className='dania-ai-page';
+  page.innerHTML=`
+    <header class="dania-ai-heading">
+      <div class="dania-ai-heading-copy"><span class="dania-ai-kicker"><span class="dania-ai-kicker-dot"></span> دستیار آموزشی دانیا</span><h1>سلام! چطور می‌تونم کمکت کنم؟</h1><p>برای طراحی محتوای آموزشی، آماده‌سازی کلاس و خلق ایده‌های تازه در کنارت هستم.</p></div>
+      <div class="dania-ai-brand-mark" aria-hidden="true"><span>✦</span><i></i><b></b></div>
+    </header>
+    <div class="dania-ai-workspace">
+      <div class="dania-ai-main">
+        <div class="dania-ai-modebar" role="tablist" aria-label="نوع درخواست">
+          <button class="dania-ai-mode active" data-mode="chat" role="tab" aria-selected="true"><span>💬</span> گفتگو</button>
+          <button class="dania-ai-mode" data-mode="infographic" role="tab" aria-selected="false"><span>🎨</span> ساخت اینفوگرافیک</button>
+          <button class="dania-ai-mode" data-mode="slides" role="tab" aria-selected="false"><span>📊</span> ساخت پاورپوینت</button>
+        </div>
+        <div class="dania-ai-conversation" id="dania-ai-conversation">
+          <div class="dania-ai-welcome" id="dania-ai-welcome">
+            <div class="dania-ai-welcome-icon">✦</div><h2>دستیار هوشمند دانیا</h2><p>موضوع یا کاری که برای کلاس نیاز داری بنویس؛ با هم یک محتوای آموزشی جذاب آماده می‌کنیم.</p>
+            <div class="dania-ai-suggestions">
+              <button type="button" data-prompt="برای درس علوم پایه پنجم یک طرح درس جذاب درباره چرخه آب طراحی کن."><span>📚</span><b>طراحی طرح درس</b><small>یک جلسه آموزشی خلاقانه</small></button>
+              <button type="button" data-prompt="یک اینفوگرافیک آموزشی درباره منظومه شمسی برای دانش‌آموزان طراحی کن."><span>🎨</span><b>ایده اینفوگرافیک</b><small>محتوای دیداری و خلاصه</small></button>
+              <button type="button" data-prompt="یک پاورپوینت ۱۰ اسلایدی درباره هوش مصنوعی برای دانش‌آموزان آماده کن."><span>📊</span><b>ساخت پاورپوینت</b><small>ارائه آماده تدریس</small></button>
+              <button type="button" data-prompt="برای درس ریاضی پایه ششم ۱۰ سؤال چهارگزینه‌ای با پاسخ‌نامه بساز."><span>📝</span><b>طراحی آزمون</b><small>سؤال و پاسخ‌نامه</small></button>
+            </div>
+          </div>
+        </div>
+        <form class="dania-ai-composer" id="dania-ai-form">
+          <textarea id="dania-ai-prompt" rows="1" placeholder="پیامت رو اینجا بنویس..." aria-label="متن درخواست"></textarea>
+          <div class="dania-ai-composer-bottom"><span class="dania-ai-hint">پاسخ‌ها با هدف کمک به فرایند تدریس طراحی می‌شوند.</span><button type="submit" class="dania-ai-send" aria-label="ارسال پیام">➤</button></div>
+        </form>
+        <div class="dania-ai-stage-note"><span>ⓘ</span> نسخه آزمایشی رابط کاربری؛ اتصال به هوش مصنوعی در مرحله بعد فعال می‌شود.</div>
+      </div>
+      <aside class="dania-ai-sidepanel">
+        <div class="dania-ai-side-title"><div><span class="dania-ai-side-icon">✧</span><b>ابزارهای معلم</b></div><span class="dania-ai-beta">به‌زودی</span></div>
+        <button class="dania-ai-tool" data-mode="infographic"><span class="dania-ai-tool-icon infographic">▧</span><span><b>اینفوگرافیک‌ساز</b><small>تبدیل موضوع درس به محتوای تصویری</small></span><i>←</i></button>
+        <button class="dania-ai-tool" data-mode="slides"><span class="dania-ai-tool-icon slides">▤</span><span><b>پاورپوینت‌ساز</b><small>ساخت ارائه قابل ویرایش</small></span><i>←</i></button>
+        <div class="dania-ai-side-divider"></div>
+        <div class="dania-ai-side-title"><div><span class="dania-ai-side-icon">✦</span><b>راهنمای شروع</b></div></div>
+        <ul class="dania-ai-tips"><li>پایه و مقطع تحصیلی را مشخص کن.</li><li>موضوع درس و هدف آموزشی را بنویس.</li><li>نوع خروجی دلخواهت را انتخاب کن.</li></ul>
+        <div class="dania-ai-privacy"><span>🔒</span><span><b>فضای اختصاصی معلم</b><small>گفتگوها پس از راه‌اندازی سرویس به حساب کاربری متصل می‌شوند.</small></span></div>
+      </aside>
+    </div>`;
+  root.appendChild(page);
+  let mode='chat';
+  const prompt=page.querySelector('#dania-ai-prompt');
+  const conversation=page.querySelector('#dania-ai-conversation');
+  const welcome=page.querySelector('#dania-ai-welcome');
+  const placeholders={chat:'پیامت رو اینجا بنویس...',infographic:'موضوع اینفوگرافیک، پایه تحصیلی و سبک طراحی را بنویس...',slides:'موضوع پاورپوینت، پایه تحصیلی و تعداد اسلایدها را بنویس...'};
+  const setMode=(next)=>{
+    mode=next;
+    page.querySelectorAll('.dania-ai-mode').forEach(b=>{const active=b.dataset.mode===mode;b.classList.toggle('active',active);b.setAttribute('aria-selected',String(active));});
+    prompt.placeholder=placeholders[mode];
+    if(mode==='infographic') prompt.value=prompt.value||'یک اینفوگرافیک آموزشی درباره ';
+    if(mode==='slides') prompt.value=prompt.value||'یک پاورپوینت آموزشی درباره ';
+    prompt.focus();
+  };
+  page.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+  page.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>{prompt.value=b.dataset.prompt;setMode(b.dataset.prompt.includes('اینفوگرافیک')?'infographic':b.dataset.prompt.includes('پاورپوینت')?'slides':'chat');prompt.focus();}));
+  page.querySelector('#dania-ai-form').addEventListener('submit',e=>{
+    e.preventDefault();const value=prompt.value.trim();if(!value)return;
+    if(welcome) welcome.remove();
+    const msg=document.createElement('div');msg.className='dania-ai-user-message';msg.textContent=value;conversation.appendChild(msg);
+    const note=document.createElement('div');note.className='dania-ai-connect-notice';note.innerHTML='<span>✦</span><div><b>درخواستت آماده اتصال است</b><p>در مرحله بعد، با اتصال امن OpenAI پاسخ واقعی و فایل خروجی را همین‌جا دریافت می‌کنی.</p></div>';conversation.appendChild(note);
+    prompt.value='';conversation.scrollTop=conversation.scrollHeight;
+  });
 }
 
 
