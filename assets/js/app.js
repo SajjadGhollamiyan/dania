@@ -1183,30 +1183,100 @@ function daniaInfographicHTML(d){
   const t=(v,n)=>escapeHtml(String(v??'').slice(0,n));
   const items=(Array.isArray(d.sections)?d.sections:[]).slice(0,6).map((x,i)=>{
     const [ac,bg]=DANIA_IG_ACCENTS[i%DANIA_IG_ACCENTS.length];
-    return `<div class="dania-ig-item" style="--ac:${ac};--bg-t:${bg}"><span class="dania-ig-icon">${t(x?.icon||'✦',8)}</span><h4>${t(x?.heading,60)}</h4><p>${t(x?.text,220)}</p>${x?.stat?`<span class="dania-ig-stat">${t(x.stat,24)}</span>`:''}</div>`;
+    return `<article class="dania-ig-item" style="--ac:${ac};--bg-t:${bg}" draggable="true" data-ig-item>
+      <span class="dania-ig-icon" contenteditable="true" spellcheck="false" data-ig-edit="icon" aria-label="ویرایش نماد">${t(x?.icon||'✦',8)}</span>
+      <h4 contenteditable="true" spellcheck="false" data-ig-edit="heading">${t(x?.heading,60)}</h4>
+      <p contenteditable="true" spellcheck="false" data-ig-edit="text">${t(x?.text,220)}</p>
+      <span class="dania-ig-stat" contenteditable="true" spellcheck="false" data-ig-edit="stat" data-placeholder="عدد یا نکته کوتاه">${t(x?.stat,24)}</span>
+      <button type="button" class="dania-ig-remove" data-ig-remove aria-label="حذف این بخش" title="حذف بخش">×</button>
+    </article>`;
   }).join('');
   const logo=typeof DANIA_LOGO_DATA_URL==='string'?`<img src="${DANIA_LOGO_DATA_URL}" alt="دانیا">`:'';
-  return `<div class="dania-ig"><header class="dania-ig-head"><h3>${t(d.title,90)}</h3>${d.subtitle?`<p>${t(d.subtitle,160)}</p>`:''}</header><div class="dania-ig-grid">${items}</div>${d.takeaway?`<div class="dania-ig-takeaway"><span>✦</span><p>${t(d.takeaway,200)}</p></div>`:''}<footer class="dania-ig-foot">${logo}</footer></div><div class="dania-ig-actions"><button type="button" class="dania-ai-tool" data-ig-download><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg><span>دانلود تصویر</span></button></div>`;
+  return `<div class="dania-ig-editor">
+    <div class="dania-ig-editorbar" role="toolbar" aria-label="ابزارهای ویرایش اینفوگرافیک">
+      <label class="dania-ig-control">رنگ قالب
+        <select data-ig-palette aria-label="انتخاب رنگ قالب">
+          <option value="purple">بنفش دانیا</option><option value="blue">آبی</option><option value="green">سبز</option><option value="orange">نارنجی</option>
+        </select>
+      </label>
+      <label class="dania-ig-control">چیدمان
+        <select data-ig-layout aria-label="انتخاب چیدمان">
+          <option value="grid">کارت‌های دو ستونه</option><option value="list">فهرست یک ستونه</option>
+        </select>
+      </label>
+      <button type="button" class="dania-ig-add" data-ig-add>+ افزودن بخش</button>
+    </div>
+    <p class="dania-ig-hint">برای ویرایش، روی عنوان یا متن هر قسمت کلیک کن. می‌توانی بخش‌ها را با کشیدن جابه‌جا کنی.</p>
+    <div class="dania-ig" data-ig-canvas style="--ig-primary:#7C6BEF;--ig-soft:#EEEBFC">
+      <header class="dania-ig-head"><h3 contenteditable="true" spellcheck="false" data-ig-edit="title">${t(d.title,90)}</h3>${d.subtitle?`<p contenteditable="true" spellcheck="false" data-ig-edit="subtitle">${t(d.subtitle,160)}</p>`:`<p contenteditable="true" spellcheck="false" data-ig-edit="subtitle">زیرعنوان اینفوگرافیک را وارد کنید</p>`}</header>
+      <div class="dania-ig-grid" data-ig-grid>${items}</div>
+      <div class="dania-ig-takeaway" ${d.takeaway?'':'hidden'} data-ig-takeaway><span>✦</span><p contenteditable="true" spellcheck="false" data-ig-edit="takeaway">${t(d.takeaway,200)}</p></div>
+      <footer class="dania-ig-foot">${logo}<span>ساخته‌شده با هوش مصنوعی دانیا</span></footer>
+    </div>
+    <div class="dania-ig-actions">
+      <button type="button" class="dania-ai-tool" data-ig-download="png">دانلود PNG</button>
+      <button type="button" class="dania-ai-tool" data-ig-download="svg">دانلود SVG (تصویر جاسازی‌شده)</button>
+      <button type="button" class="dania-ai-tool" data-ig-download="pdf">دانلود PDF</button>
+    </div>
+  </div>`;
+}
+function daniaDownloadBlob(blob,name){
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
 }
 function daniaWireInfographic(scope){
-  const btn=scope.querySelector('[data-ig-download]'), card=scope.querySelector('.dania-ig');
-  if(!btn||!card) return;
-  btn.addEventListener('click',async()=>{
-    if(typeof html2canvas!=='function') return;
-    btn.disabled=true;
-    try{
-      if(document.fonts?.ready) await document.fonts.ready;
-      const canvas=await html2canvas(card,{scale:Math.min(4,Math.max(2,1080/card.offsetWidth)),backgroundColor:'#ffffff',useCORS:true});
-      canvas.toBlob(blob=>{
-        if(!blob) return;
-        const a=document.createElement('a');
-        a.href=URL.createObjectURL(blob); a.download='dania-infographic.png';
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(()=>URL.revokeObjectURL(a.href),1500);
-      },'image/png');
-    }catch(err){ console.error(err); }
-    finally{ btn.disabled=false; }
+  const card=scope.querySelector('[data-ig-canvas]'),grid=scope.querySelector('[data-ig-grid]');
+  if(!card||!grid)return;
+  const palettes={purple:['#7C6BEF','#EEEBFC'],blue:['#3478D4','#E8F1FF'],green:['#159B75','#E5F7F0'],orange:['#D9822B','#FFF1E2']};
+  const palette=scope.querySelector('[data-ig-palette]');
+  palette?.addEventListener('change',()=>{
+    const colors=palettes[palette.value]||palettes.purple;
+    card.style.setProperty('--ig-primary',colors[0]);card.style.setProperty('--ig-soft',colors[1]);
   });
+  scope.querySelector('[data-ig-layout]')?.addEventListener('change',e=>card.classList.toggle('dania-ig-list',e.target.value==='list'));
+  scope.querySelector('[data-ig-add]')?.addEventListener('click',()=>{
+    if(grid.children.length>=8){alert('حداکثر ۸ بخش قابل نمایش است.');return;}
+    const item=document.createElement('article');item.className='dania-ig-item';item.style.cssText='--ac:#7C6BEF;--bg-t:#EEEBFC';item.draggable=true;item.dataset.igItem='';
+    item.innerHTML='<span class="dania-ig-icon" contenteditable="true" data-ig-edit="icon">✦</span><h4 contenteditable="true" data-ig-edit="heading">عنوان جدید</h4><p contenteditable="true" data-ig-edit="text">متن این بخش را وارد کنید.</p><span class="dania-ig-stat" contenteditable="true" data-ig-edit="stat" data-placeholder="عدد یا نکته کوتاه"></span><button type="button" class="dania-ig-remove" data-ig-remove aria-label="حذف این بخش">×</button>';
+    grid.appendChild(item);item.querySelector('[data-ig-edit="heading"]').focus();
+  });
+  scope.addEventListener('click',e=>{
+    const remove=e.target.closest('[data-ig-remove]');
+    if(remove){remove.closest('[data-ig-item]')?.remove();}
+  });
+  let dragged=null;
+  grid.addEventListener('dragstart',e=>{dragged=e.target.closest('[data-ig-item]');if(dragged){dragged.classList.add('is-dragging');e.dataTransfer.effectAllowed='move';}});
+  grid.addEventListener('dragover',e=>{if(!dragged)return;e.preventDefault();const target=e.target.closest('[data-ig-item]');if(target&&target!==dragged){const r=target.getBoundingClientRect();grid.insertBefore(dragged,e.clientY<r.top+r.height/2?target:target.nextSibling);}});
+  grid.addEventListener('dragend',()=>{dragged?.classList.remove('is-dragging');dragged=null;});
+  scope.addEventListener('paste',e=>{const editable=e.target.closest('[contenteditable="true"]');if(!editable)return;e.preventDefault();const text=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,text);});
+  scope.querySelectorAll('[data-ig-download]').forEach(btn=>btn.addEventListener('click',async()=>{
+    const type=btn.dataset.igDownload;
+    if(typeof html2canvas!=='function'){alert('ابزار خروجی تصویر بارگذاری نشده است.');return;}
+    btn.disabled=true;const oldText=btn.textContent;btn.textContent='در حال آماده‌سازی…';
+    try{
+      if(document.fonts?.ready)await document.fonts.ready;
+      card.classList.add('dania-ig-exporting');
+      const canvas=await html2canvas(card,{scale:2,backgroundColor:'#ffffff',useCORS:true,logging:false});
+      if(type==='png'){
+        const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+        if(blob)daniaDownloadBlob(blob,'dania-infographic.png');
+      }else if(type==='pdf'){
+        if(!window.jspdf?.jsPDF)throw new Error('ابزار ساخت PDF بارگذاری نشده است.');
+        const {jsPDF}=window.jspdf,orientation=canvas.width>canvas.height?'landscape':'portrait';
+        const pdf=new jsPDF({orientation,unit:'px',format:[canvas.width,canvas.height],compress:true});
+        pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,0,canvas.width,canvas.height);
+        pdf.save('dania-infographic.pdf');
+      }else if(type==='svg'){
+        // SVG wrapper preserves the exact rendered appearance as an embedded image.
+        // The source infographic remains editable in Dania before export.
+        const png=canvas.toDataURL('image/png');
+        const svg=`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${canvas.width}" height="${canvas.height}" viewBox="0 0 ${canvas.width} ${canvas.height}"><image width="100%" height="100%" xlink:href="${png}"/></svg>`;
+        daniaDownloadBlob(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}),'dania-infographic.svg');
+      }
+    }catch(err){console.error(err);alert(err.message||'ساخت فایل ناموفق بود.');}
+    finally{card.classList.remove('dania-ig-exporting');btn.disabled=false;btn.textContent=oldText;}
+  }));
 }
 
 // DANIA AI — رابط گفتگوی مینیمال و مدرن

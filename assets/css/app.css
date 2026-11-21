@@ -1969,3 +1969,28 @@ html[data-theme="dark"] .student-grid > .s-card .s-actions{
 .dania-ig-actions{display:flex;margin-top:10px}
 .dania-ai-page .dania-ai-tool:disabled{opacity:.5;cursor:wait}
 @media(max-width:520px){.dania-ig-grid{grid-template-columns:1fr}}
+
+/* DANIA INFOGRAPHIC EDITOR — editable canvas and export controls */
+.dania-ig-editor{width:100%;max-width:760px;min-width:0}
+.dania-ig-editorbar{display:flex;align-items:end;gap:9px;flex-wrap:wrap;padding:12px;background:var(--surface,#fff);border:1px solid var(--border,#e8e8f0);border-radius:14px}
+.dania-ig-control{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:700;color:var(--text-secondary,#77778d)}
+.dania-ig-control select{min-width:125px;padding:8px 10px;border:1px solid var(--border,#e3e3ed);border-radius:9px;background:var(--surface,#fff);color:var(--text,#222);font:inherit}
+.dania-ig-add{padding:9px 12px;border:0;border-radius:9px;background:#7C6BEF;color:#fff;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.dania-ig-hint{margin:9px 2px 12px;color:var(--text-secondary,#77778d);font-size:11px;line-height:1.8}
+.dania-ig{max-width:100%;--ig-primary:#7C6BEF;--ig-soft:#EEEBFC}
+.dania-ig-head{background:radial-gradient(circle at 10% 120%,rgba(255,255,255,.22),transparent 45%),linear-gradient(135deg,var(--ig-primary),color-mix(in srgb,var(--ig-primary),#fff 18%))}
+.dania-ig-takeaway{background:var(--ig-soft);color:var(--ig-primary)}
+.dania-ig-list .dania-ig-grid{grid-template-columns:1fr}
+.dania-ig-item{position:relative;min-width:0;cursor:grab}
+.dania-ig-item.is-dragging{opacity:.45}
+.dania-ig-item [contenteditable=true],.dania-ig-head [contenteditable=true],.dania-ig-takeaway [contenteditable=true]{outline:1px dashed transparent;border-radius:4px;cursor:text;transition:outline-color .15s}
+.dania-ig-item [contenteditable=true]:focus,.dania-ig-head [contenteditable=true]:focus,.dania-ig-takeaway [contenteditable=true]:focus{outline:1px dashed var(--ig-primary,#7C6BEF);outline-offset:3px}
+.dania-ig-remove{position:absolute;left:7px;top:7px;width:23px;height:23px;border:0;border-radius:50%;background:#fff0f0;color:#c33;font-size:17px;line-height:1;cursor:pointer;opacity:0;transition:opacity .15s}
+.dania-ig-item:hover .dania-ig-remove,.dania-ig-remove:focus{opacity:1}
+.dania-ig-foot{align-items:center;gap:9px;color:#888;font-size:10px}
+.dania-ig-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.dania-ig-actions .dania-ai-tool{cursor:pointer}
+.dania-ig-actions .dania-ai-tool:disabled{opacity:.55;cursor:wait}
+@media(max-width:520px){.dania-ig-editorbar{align-items:stretch}.dania-ig-control{flex:1}.dania-ig-control select{width:100%;min-width:0}.dania-ig-add{width:100%}.dania-ig-remove{opacity:1}}
+.dania-ig-stat:empty::before{content:attr(data-placeholder);font-size:10px;font-weight:500;opacity:.55}
+.dania-ig-exporting .dania-ig-remove{display:none!important}
