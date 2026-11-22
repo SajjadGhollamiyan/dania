@@ -1170,13 +1170,23 @@ function render(){
 // DANIA AI — اتصال به Edge Function «dania-ai» در Supabase (ساخت اینفوگرافیک)
 const DANIA_IG_ACCENTS=[['#5B47E0','#EEEBFC'],['#0EA672','#E4F7EE'],['#DD9A1F','#FDF3DF'],['#E63B5C','#FCE9ED']];
 async function daniaAIInfographic(prompt){
-  const {data,error}=await sb.functions.invoke('dania-ai',{body:{prompt}});
-  if(error){
-    let msg='';
-    try{ const j=await error.context.json(); msg=j?.message||''; }catch(_){}
-    throw new Error(msg||'ساخت اینفوگرافیک ناموفق بود؛ دوباره تلاش کن.');
-  }
-  if(!data?.infographic) throw new Error(data?.message||'ساخت اینفوگرافیک ناموفق بود؛ دوباره تلاش کن.');
+  // احراز هویت همچنان با Supabase انجام می‌شود؛ تولید محتوا به Pages Function منتقل شده است.
+  const {data:sessionData,error:sessionError}=await sb.auth.getSession();
+  const accessToken=sessionData?.session?.access_token;
+  if(sessionError || !accessToken) throw new Error('نشست شما معتبر نیست؛ دوباره وارد حساب کاربری شوید.');
+
+  const response=await fetch('/api/infographic',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':`Bearer ${accessToken}`,
+      'apikey':SUPABASE_ANON_KEY
+    },
+    body:JSON.stringify({prompt})
+  });
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok) throw new Error(data?.message||'ساخت اینفوگرافیک ناموفق بود؛ دوباره تلاش کن.');
+  if(!data?.infographic) throw new Error(data?.message||'پاسخ معتبری از هوش مصنوعی دریافت نشد.');
   return data.infographic;
 }
 function daniaInfographicHTML(d){
