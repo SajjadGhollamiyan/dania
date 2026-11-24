@@ -49,7 +49,7 @@ export async function onRequest(context) {
   const { request, env } = context;
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders });
   if (request.method !== 'POST') return json({ message: 'روش درخواست نامعتبر است.' }, 405);
-  if (!env.AI) return json({ message: 'اتصال Workers AI هنوز در این نسخه فعال نشده است؛ یک بار دیگر Preview را منتشر کنید.' }, 503);
+  if (!env.AI) return json({ message: 'AI binding is missing. Available bindings: ' + Object.keys(env).join(', ') }, 503);
 
   try {
     const authorization = request.headers.get('Authorization') || '';
